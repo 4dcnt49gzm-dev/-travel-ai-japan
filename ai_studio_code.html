@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旅栞 TABISHIORI | AI Premium Travel Planner</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="antialiased">
+
+    <!-- ナビゲーション -->
+    <nav class="navbar no-print bg-white py-4 px-6 shadow-sm sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <h1 class="logo text-2xl font-bold tracking-widest text-[#002B5B]">旅栞 <span class="text-xs font-light">TABISHIORI</span></h1>
+            <p class="hidden md:block text-[10px] text-slate-400 tracking-widest uppercase italic">AI Travel Consultant</p>
+        </div>
+    </nav>
+
+    <!-- ヒーローセクション -->
+    <header class="hero no-print flex items-center justify-center text-center text-white relative h-[350px] overflow-hidden">
+        <div class="z-10 px-4">
+            <h2 class="serif text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">知性を愉しむ、大人の旅路。</h2>
+            <p class="text-sm md:text-base tracking-[0.3em] font-light drop-shadow-md">実在の銘店と名所を、AIがあなたのために編纂します</p>
+        </div>
+        <div class="absolute inset-0 bg-black/40"></div>
+    </header>
+
+    <main class="container max-w-4xl mx-auto -mt-16 relative z-20 px-4 pb-20">
+        <!-- 入力フォームセクション -->
+        <section class="input-section bg-white rounded-lg shadow-2xl p-6 md:p-12 no-print">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+                <div class="form-group">
+                    <label class="text-xs font-bold text-[#002B5B] uppercase tracking-wider mb-2 block">出発地</label>
+                    <input type="text" id="departure" placeholder="例：東京駅" class="w-full border-b-2 border-slate-200 py-2 focus:border-[#002B5B] outline-none transition-colors bg-transparent">
+                </div>
+                <div class="form-group">
+                    <label class="text-xs font-bold text-[#002B5B] uppercase tracking-wider mb-2 block">同行者</label>
+                    <select id="companion" class="w-full border-b-2 border-slate-200 py-2 outline-none bg-transparent">
+                        <option value="1人">1人旅</option>
+                        <option value="友人">友人</option>
+                        <option value="カップル">カップル・夫婦</option>
+                        <option value="家族">家族（子供・高齢者含む）</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="text-xs font-bold text-[#002B5B] uppercase tracking-wider mb-2 block">予算目安（総額）</label>
+                    <select id="budget" class="w-full border-b-2 border-slate-200 py-2 outline-none bg-transparent">
+                        <option value="3万円以内">〜3万円</option>
+                        <option value="10万円程度">〜10万円</option>
+                        <option value="30万円以上">30万円以上</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="text-xs font-bold text-[#002B5B] uppercase tracking-wider mb-2 block">日数</label>
+                    <select id="days" class="w-full border-b-2 border-slate-200 py-2 outline-none bg-transparent">
+                        <option value="日帰り">日帰り</option>
+                        <option value="1泊2日">1泊2日</option>
+                        <option value="2泊3日">2泊3日</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="text-xs font-bold text-[#002B5B] uppercase tracking-wider mb-2 block">旅の目的・こだわり</label>
+                    <textarea id="purpose" rows="2" placeholder="例：温泉と、実在する評価の高い地元料理を堪能したい" class="w-full border-2 border-slate-100 rounded p-3 focus:border-[#002B5B] outline-none transition-all"></textarea>
+                </div>
+            </div>
+            <div class="text-center mt-10">
+                <button id="generateBtn" class="bg-[#002B5B] text-white px-16 py-4 rounded-full font-bold text-lg hover:bg-[#003e82] transition-all shadow-xl tracking-widest">
+                    プランを編纂する
+                </button>
+            </div>
+        </section>
+
+        <!-- ローディング表示 -->
+        <div id="loading" class="hidden py-20 text-center">
+            <div class="spinner border-4 border-slate-200 border-t-[#002B5B] rounded-full w-12 h-12 animate-spin mx-auto mb-4"></div>
+            <p class="serif text-xl text-slate-600">実在のスポットを確認しながら、行程を編纂中...</p>
+        </div>
+
+        <!-- エラーメッセージ -->
+        <div id="error-message" class="hidden bg-red-50 text-red-600 p-6 rounded-lg mt-10 text-center border border-red-100 font-bold"></div>
+
+        <!-- 結果表示エリア -->
+        <div id="result" class="hidden mt-12 fade-in">
+            <div class="flex justify-end gap-3 mb-6 no-print">
+                <button onclick="window.print()" class="text-xs border border-slate-300 px-5 py-2 rounded hover:bg-slate-50 transition"><i class="fas fa-print mr-2"></i>PDF / 印刷保存</button>
+                <button id="copyBtn" class="text-xs border border-slate-300 px-5 py-2 rounded hover:bg-slate-50 transition"><i class="far fa-copy mr-2"></i>テキストコピー</button>
+            </div>
+
+            <article id="print-area" class="bg-white p-8 md:p-16 shadow-sm border border-slate-100">
+                <div class="text-center mb-20">
+                    <p class="text-[10px] tracking-[0.5em] text-slate-400 uppercase mb-4">Verified Travel Proposal</p>
+                    <h3 id="res-destination" class="serif text-4xl md:text-5xl text-[#002B5B] mb-6"></h3>
+                    <p id="res-tagline" class="text-slate-500 italic text-xl serif leading-relaxed"></p>
+                </div>
+
+                <div class="space-y-24">
+                    <!-- タイムラインセクション -->
+                    <section>
+                        <h4 class="serif text-2xl border-b-2 border-[#002B5B] pb-3 mb-12 flex items-center">
+                            <i class="far fa-clock mr-3 text-lg"></i> 旅の栞
+                        </h4>
+                        <div id="res-timeline" class="timeline-container border-l-2 border-slate-100 ml-16 md:ml-24 pl-8 md:pl-10 space-y-10"></div>
+                    </section>
+
+                    <!-- スポットセクション -->
+                    <section>
+                        <h4 class="serif text-2xl border-b-2 border-[#002B5B] pb-3 mb-12 flex items-center">
+                            <i class="fas fa-map-marked-alt mr-3 text-lg"></i> 厳選スポット
+                        </h4>
+                        <div id="res-spots" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
+                    </section>
+
+                    <!-- 補足情報 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 pt-10 border-t border-slate-100">
+                        <div>
+                            <h5 class="font-bold mb-6 text-[#002B5B] flex items-center"><i class="fas fa-info-circle mr-2"></i> 旅の心得</h5>
+                            <div id="res-points" class="text-sm text-slate-600 space-y-3 font-light"></div>
+                        </div>
+                        <div>
+                            <h5 class="font-bold mb-6 text-[#002B5B] flex items-center"><i class="fas fa-suitcase mr-2"></i> 推奨される持ち物</h5>
+                            <div id="res-items" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <footer class="no-print py-10 text-center text-[10px] text-slate-400 tracking-widest uppercase">
+        &copy; TABISHIORI AI Premium Travel Planner. All Rights Reserved.
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
